@@ -16,12 +16,12 @@
     <text x="0" y="204" font-size="24" fill="#C9D1D9">agents, retrieval, APIs, front ends and the infrastructure they run on.</text>
   </g>
 
-  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17" text-anchor="end">
-    <text x="1200" y="58" fill="#8B949E">ROLE</text>
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19" text-anchor="end">
+    <text x="1200" y="58" font-size="16" letter-spacing="1.5" fill="#8B949E">ROLE</text>
     <text x="1200" y="82" fill="#E6EDF3">AI Engineer, Plant Supervision</text>
-    <text x="1200" y="122" fill="#8B949E">EDUCATION</text>
+    <text x="1200" y="122" font-size="16" letter-spacing="1.5" fill="#8B949E">EDUCATION</text>
     <text x="1200" y="146" fill="#E6EDF3">MSc Business Data Science, Aalborg University</text>
-    <text x="1200" y="186" fill="#8B949E">STACK</text>
+    <text x="1200" y="186" font-size="16" letter-spacing="1.5" fill="#8B949E">STACK</text>
     <text x="1200" y="210" fill="#E6EDF3">Python · TypeScript · Azure · Hetzner · Kubernetes</text>
   </g>
 </svg>
