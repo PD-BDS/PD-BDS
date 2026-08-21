@@ -73,6 +73,15 @@ class RankWithOtherTest(unittest.TestCase):
         self.assertEqual(bc.rank_with_other({}), [])
 
 
+class MergeAliasesTest(unittest.TestCase):
+    def test_groups_js_and_ts_under_one_label(self):
+        merged = bc.merge_aliases({"Python": 80, "JavaScript": 15, "TypeScript": 2, "Shell": 1})
+        self.assertEqual(merged, {"Python": 80, "TypeScript / JavaScript": 17, "Shell": 1})
+
+    def test_identity_without_aliases(self):
+        self.assertEqual(bc.merge_aliases({"Python": 1}, aliases={}), {"Python": 1})
+
+
 class FormatPctTest(unittest.TestCase):
     def test_formats_and_boundaries(self):
         self.assertEqual(bc.format_pct(95.34), "95.3%")
@@ -239,6 +248,7 @@ class BuildTest(unittest.TestCase):
         for svg in cards.values():
             xml.dom.minidom.parseString(svg)
         self.assertIn(">4<", cards["activity-dark.svg"])
+        self.assertIn(">TypeScript / JavaScript<", cards["languages-by-repo-dark.svg"])
         self.assertIn("3 stars received", cards["activity-light.svg"])
 
     def test_refuses_when_no_data(self):

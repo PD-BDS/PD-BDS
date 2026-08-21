@@ -44,6 +44,8 @@ MAX_PAGES = 50
 
 HIDDEN = frozenset({"Jupyter Notebook", "HTML", "CSS", "Mako", "SCSS"})
 TOP_N = 4  # ranked rows before everything else is folded into "Other"
+# Languages shown under one label (same ecosystem); applied before ranking.
+ALIASES = {"TypeScript": "TypeScript / JavaScript", "JavaScript": "TypeScript / JavaScript"}
 
 SANS = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif"
 MONO = "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
@@ -135,6 +137,16 @@ def visible_only(totals: Mapping[str, float],
                  hidden: frozenset[str] = HIDDEN) -> dict[str, float]:
     """Drop hidden languages and zero-size entries."""
     return {k: v for k, v in totals.items() if k not in hidden and v > 0}
+
+
+def merge_aliases(totals: Mapping[str, float],
+                  aliases: Mapping[str, str] = ALIASES) -> dict[str, float]:
+    """Fold aliased languages into their shared label, summing their sizes."""
+    merged: dict[str, float] = {}
+    for name, val in totals.items():
+        label = aliases.get(name, name)
+        merged[label] = merged.get(label, 0.0) + val
+    return merged
 
 
 def rank_with_other(totals: Mapping[str, float], top_n: int = TOP_N) -> Rows:
@@ -386,9 +398,9 @@ def fetch_contributions(user: str, token: str) -> dict[str, Any]:
 def _build(user: str, token: str, include_private: bool) -> dict[str, str]:
     repos = list_repos(user, token, include_private)
     by_bytes = aggregate_bytes([repo_languages(r["full_name"], token) for r in repos])
-    rows_bytes = rank_with_other(visible_only(by_bytes))
+    rows_bytes = rank_with_other(merge_aliases(visible_only(by_bytes)))
     data = fetch_contributions(user, token)
-    rows_commit = rank_with_other(commit_weighted(parse_commit_buckets(data)))
+    rows_commit = rank_with_other(merge_aliases(commit_weighted(parse_commit_buckets(data))))
     calendar = parse_calendar(data)
     if not repos or not rows_bytes or not rows_commit or not calendar.weeks:
         raise RuntimeError("no data returned; refusing to overwrite cards")
