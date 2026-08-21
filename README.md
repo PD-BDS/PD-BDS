@@ -51,13 +51,13 @@ Products I have built as an AI Engineer since 2025. The code is private; I'm gla
 **Assessk** · SaaS for ISO 12100 machinery risk assessment<br>
 *Problem:* risk assessments for industrial machinery are long, expert-heavy documents that safety engineers assemble by hand from standards, checklists and templates.<br>
 *What it does:* a SaaS application that takes a safety engineer through the whole assessment — project setup, hazard identification, risk estimation, reduction measures and the final PDF report — with LangGraph agents that draft and check content using retrieval over the ISO and EU source texts. A desktop shell supports on-site use.<br>
-*Built on:* FastAPI with async SQLAlchemy, LangGraph workflows and RAG; Next.js, React and Tailwind front end; Electron desktop shell; self-hosted on Hetzner with Docker Compose, Caddy, Prometheus and Grafana monitoring, and automated backups.<br>
+*Built on:* FastAPI with async PostgreSQL, LangGraph workflows and RAG; Next.js, React and Tailwind front end; Electron desktop shell; self-hosted on Hetzner with Docker Compose, Caddy, Prometheus and Grafana monitoring, and automated backups.<br>
 `FastAPI` `LangGraph` `RAG` `Next.js` `TypeScript` `Docker` `Hetzner`
 
 **Contractbook** · internal contract-lifecycle tool<br>
 *Problem:* contracts drafted in Word and signed over email leave no reliable record of who changed or approved what.<br>
 *What it does:* drafting in a rich-text editor with templates, electronic signature, PDF generation, and a hash-chained audit trail so every revision and signature is verifiable.<br>
-*Built on:* FastAPI with SQLAlchemy and JWT authentication; React and TypeScript front end (Vite, TanStack Query, TipTap editor) with Tailwind.<br>
+*Built on:* FastAPI with PostgreSQL and JWT authentication; React and TypeScript front end (Vite, TanStack Query, TipTap editor) with Tailwind.<br>
 `FastAPI` `React` `TypeScript` `Vite` `Tailwind`
 
 ## Tools I use
