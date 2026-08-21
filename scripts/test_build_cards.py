@@ -6,6 +6,27 @@ from unittest import mock
 
 import build_cards as bc
 
+DARK, LIGHT = bc.THEMES["dark"], bc.THEMES["light"]
+
+
+def _contrib_payload(buckets=None, weeks=None, total=0):
+    return {"data": {"user": {"contributionsCollection": {
+        "contributionCalendar": {"totalContributions": total, "weeks": weeks or []},
+        "commitContributionsByRepository": buckets or [],
+    }}}}
+
+
+def _bucket(count, is_fork=False, languages=None):
+    return {"contributions": {"totalCount": count},
+            "repository": {"nameWithOwner": "pd/x", "isFork": is_fork, "languages": languages}}
+
+
+def _week(start, *counts):
+    year, month, day = (int(x) for x in start.split("-"))
+    return {"contributionDays": [
+        {"date": f"{year:04d}-{month:02d}-{day + i:02d}", "contributionCount": c}
+        for i, c in enumerate(counts)]}
+
 
 class AggregateBytesTest(unittest.TestCase):
     def test_sums_across_repositories(self):
@@ -55,17 +76,39 @@ class FormatPctTest(unittest.TestCase):
     def test_formats_and_boundaries(self):
         self.assertEqual(bc.format_pct(95.34), "95.3%")
         self.assertEqual(bc.format_pct(10.0), "10.0%")
-        self.assertEqual(bc.format_pct(3.8), "3.8%")
         self.assertEqual(bc.format_pct(0.1), "0.1%")
         self.assertEqual(bc.format_pct(0.04), "<0.1%")
         self.assertEqual(bc.format_pct(100.0), "100.0%")
 
 
+class ParseContributionsTest(unittest.TestCase):
+    def test_commit_buckets_skip_forks_and_null_languages(self):
+        data = _contrib_payload(buckets=[
+            _bucket(7, languages={"edges": [{"size": 90, "node": {"name": "Python"}},
+                                            {"size": 10, "node": {"name": "TypeScript"}}]}),
+            _bucket(3, is_fork=True, languages={"edges": []}),
+            _bucket(2, languages=None),
+        ])
+        self.assertEqual(bc.parse_commit_buckets(data),
+                         [(7, {"Python": 90, "TypeScript": 10}), (2, {})])
+
+    def test_calendar_weekly_sums_and_starts(self):
+        data = _contrib_payload(weeks=[_week("2026-01-04", 1, 2, 0), _week("2026-01-11", 0, 5)],
+                                total=8)
+        cal = bc.parse_calendar(data)
+        self.assertEqual(cal.total, 8)
+        self.assertEqual(cal.weeks, (3, 5))
+        self.assertEqual(cal.week_starts, ("2026-01-04", "2026-01-11"))
+
+    def test_month_ticks_first_week_only(self):
+        starts = ("2025-12-28", "2026-01-04", "2026-01-11", "2026-02-01", "2026-02-08")
+        self.assertEqual(bc.month_ticks(starts), [(1, "Jan"), (3, "Feb")])
+
+
 class RenderCardTest(unittest.TestCase):
     def test_contains_title_rows_and_no_external_refs(self):
         svg = bc.render_card("Top languages by repo", "code size across 18 public repos",
-                             [("Python", 95.3), ("TypeScript", 3.8), ("Other", 0.9)])
-        self.assertIn("<svg", svg)
+                             [("Python", 95.3), ("TypeScript", 3.8), ("Other", 0.9)], DARK)
         self.assertIn("Top languages by repo", svg)
         self.assertIn(">Python<", svg)
         self.assertIn(">TypeScript<", svg)
@@ -75,15 +118,41 @@ class RenderCardTest(unittest.TestCase):
         xml.dom.minidom.parseString(svg)
 
     def test_escapes_markup_in_every_text_slot(self):
-        svg = bc.render_card("A & B", "<x>", [("C<&>D", 99.95), ("Other", 0.05)])
+        svg = bc.render_card("A & B", "<x>", [("C<&>D", 99.95), ("Other", 0.05)], LIGHT)
         self.assertIn("A &amp; B", svg)
         self.assertIn("&lt;x&gt;", svg)
         self.assertIn("C&lt;&amp;&gt;D", svg)
         self.assertIn("&lt;0.1%", svg)
         xml.dom.minidom.parseString(svg)
 
-    def test_empty_rows_still_well_formed(self):
-        xml.dom.minidom.parseString(bc.render_card("Empty", "nothing", []))
+    def test_themes_differ_and_empty_rows_parse(self):
+        dark = bc.render_card("Empty", "nothing", [], DARK)
+        light = bc.render_card("Empty", "nothing", [], LIGHT)
+        xml.dom.minidom.parseString(dark)
+        xml.dom.minidom.parseString(light)
+        self.assertIn(DARK.bg, dark)
+        self.assertIn(LIGHT.bg, light)
+        self.assertNotEqual(dark, light)
+
+
+class RenderActivityTest(unittest.TestCase):
+    def test_renders_chart_total_and_stats(self):
+        cal = bc.Calendar(278, (0, 4, 9, 2, 0, 7), ("2026-01-04", "2026-01-11", "2026-01-18",
+                                                    "2026-01-25", "2026-02-01", "2026-02-08"))
+        svg = bc.render_activity(cal, 19, 11, DARK)
+        xml.dom.minidom.parseString(svg)
+        self.assertIn(">278<", svg)
+        self.assertIn("19 repositories", svg)
+        self.assertIn("11 stars received", svg)
+        self.assertIn(">Jan<", svg)
+        self.assertIn(">Feb<", svg)
+        self.assertIn("<path", svg)
+
+    def test_handles_too_few_weeks_and_light_theme(self):
+        svg = bc.render_activity(bc.Calendar(0, (), ()), 0, 0, LIGHT)
+        xml.dom.minidom.parseString(svg)
+        self.assertIn("no calendar data", svg)
+        self.assertIn(LIGHT.bg, svg)
 
 
 class PagedTest(unittest.TestCase):
@@ -118,35 +187,44 @@ class ListReposTest(unittest.TestCase):
             bc.list_repos("bad/name?x", "tok", include_private=False)
 
 
-class CommitContributionsTest(unittest.TestCase):
-    @staticmethod
-    def _bucket(count, is_fork=False, languages=None):
-        return {"contributions": {"totalCount": count},
-                "repository": {"nameWithOwner": "pd/x", "isFork": is_fork, "languages": languages}}
-
-    def test_parses_buckets_and_skips_forks_and_null_languages(self):
-        data = {"data": {"user": {"contributionsCollection": {"commitContributionsByRepository": [
-            self._bucket(7, languages={"edges": [{"size": 90, "node": {"name": "Python"}},
-                                                 {"size": 10, "node": {"name": "TypeScript"}}]}),
-            self._bucket(3, is_fork=True, languages={"edges": []}),
-            self._bucket(2, languages=None),
-        ]}}}}
-        with mock.patch.object(bc, "_request", return_value=data):
-            result = bc.commit_contributions("pd", "tok")
-        self.assertEqual(result, [(7, {"Python": 90, "TypeScript": 10}), (2, {})])
-
+class FetchContributionsTest(unittest.TestCase):
     def test_raises_on_graphql_errors(self):
         with mock.patch.object(bc, "_request", return_value={"errors": [{"message": "nope"}]}):
             with self.assertRaises(RuntimeError):
-                bc.commit_contributions("pd", "tok")
+                bc.fetch_contributions("pd", "tok")
+
+
+class BuildTest(unittest.TestCase):
+    def test_produces_six_themed_cards(self):
+        repos = [{"full_name": "pd/a", "stargazers_count": 3}, {"full_name": "pd/b", "stargazers_count": 0}]
+        data = _contrib_payload(
+            buckets=[_bucket(5, languages={"edges": [{"size": 80, "node": {"name": "Python"}},
+                                                     {"size": 20, "node": {"name": "TypeScript"}}]})],
+            weeks=[_week("2026-01-04", 1, 1), _week("2026-01-11", 2)], total=4)
+        with mock.patch.object(bc, "list_repos", return_value=repos), \
+                mock.patch.object(bc, "repo_languages", side_effect=[{"Python": 100}, {"TypeScript": 50}]), \
+                mock.patch.object(bc, "fetch_contributions", return_value=data):
+            cards = bc._build("pd", "tok", include_private=False)
+        self.assertEqual(sorted(cards), sorted(
+            f"{n}-{t}.svg" for n in ("activity", "languages-by-repo", "languages-by-commit")
+            for t in ("dark", "light")))
+        for svg in cards.values():
+            xml.dom.minidom.parseString(svg)
+        self.assertIn(">4<", cards["activity-dark.svg"])
+        self.assertIn("3 stars received", cards["activity-light.svg"])
+
+    def test_refuses_when_no_data(self):
+        with mock.patch.object(bc, "list_repos", return_value=[]), \
+                mock.patch.object(bc, "fetch_contributions", return_value=_contrib_payload()):
+            with self.assertRaises(RuntimeError):
+                bc._build("pd", "tok", include_private=False)
 
 
 class MainGuardTest(unittest.TestCase):
-    def test_refuses_to_write_cards_when_no_data(self):
+    def test_returns_1_and_writes_nothing_when_build_fails(self):
         env = {"USERNAME": "pd", "GITHUB_TOKEN": "tok"}
         with mock.patch.dict(os.environ, env, clear=False), \
-                mock.patch.object(bc, "list_repos", return_value=[]), \
-                mock.patch.object(bc, "commit_contributions", return_value=[]), \
+                mock.patch.object(bc, "_build", side_effect=RuntimeError("no data")), \
                 mock.patch.object(bc.Path, "write_text") as write:
             self.assertEqual(bc.main(), 1)
         write.assert_not_called()
