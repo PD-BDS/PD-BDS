@@ -416,6 +416,20 @@ def _build(user: str, token: str, include_private: bool) -> dict[str, str]:
     return cards
 
 
+def _build_with_fallback(user: str, token: str, profile_token: str,
+                         github_token: str) -> dict[str, str]:
+    """Build with PROFILE_TOKEN; on 401 (revoked/expired) retry public-only."""
+    try:
+        return _build(user, token, include_private=bool(profile_token))
+    except urllib.error.HTTPError as err:
+        if err.code != 401 or not profile_token or not github_token:
+            raise
+        print("warning: PROFILE_TOKEN was rejected (401); falling back to public scope. "
+              "Update the repository secret to include private repositories again.",
+              file=sys.stderr)
+        return _build(user, github_token, include_private=False)
+
+
 def main() -> int:
     # PROFILE_USER wins; USERNAME is kept for compatibility but note that Windows
     # sets USERNAME to the OS login, so always pass PROFILE_USER for local runs.
@@ -431,7 +445,8 @@ def main() -> int:
 
     print(f"scope: {'private + public (PROFILE_TOKEN)' if profile_token else 'public only'}")
     try:
-        cards = _build(user, token, include_private=bool(profile_token))
+        cards = _build_with_fallback(user, token, profile_token,
+                                     os.environ.get("GITHUB_TOKEN", "").strip())
     except urllib.error.HTTPError as err:
         print(f"GitHub API error {err.code} for {err.url}: {err.read()[:300]!r}", file=sys.stderr)
         return 1

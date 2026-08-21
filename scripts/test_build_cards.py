@@ -258,6 +258,36 @@ class BuildTest(unittest.TestCase):
                 bc._build("pd", "tok", include_private=False)
 
 
+class FallbackTest(unittest.TestCase):
+    @staticmethod
+    def _http_error(code):
+        import io
+        import urllib.error
+        return urllib.error.HTTPError("https://api.github.com/user/repos", code, "x", {}, io.BytesIO(b""))
+
+    def test_401_on_profile_token_falls_back_to_public(self):
+        calls = []
+
+        def fake_build(user, token, include_private):
+            calls.append((token, include_private))
+            if include_private:
+                raise self._http_error(401)
+            return {"ok.svg": "<svg/>"}
+
+        with mock.patch.object(bc, "_build", side_effect=fake_build):
+            cards = bc._build_with_fallback("pd", "pat", "pat", "ghtok")
+        self.assertEqual(cards, {"ok.svg": "<svg/>"})
+        self.assertEqual(calls, [("pat", True), ("ghtok", False)])
+
+    def test_other_errors_and_public_scope_are_not_swallowed(self):
+        with mock.patch.object(bc, "_build", side_effect=self._http_error(403)):
+            with self.assertRaises(bc.urllib.error.HTTPError):
+                bc._build_with_fallback("pd", "pat", "pat", "ghtok")
+        with mock.patch.object(bc, "_build", side_effect=self._http_error(401)):
+            with self.assertRaises(bc.urllib.error.HTTPError):
+                bc._build_with_fallback("pd", "ghtok", "", "ghtok")
+
+
 class MainGuardTest(unittest.TestCase):
     def test_returns_1_and_writes_nothing_when_build_fails(self):
         env = {"PROFILE_USER": "pd", "GITHUB_TOKEN": "tok"}
