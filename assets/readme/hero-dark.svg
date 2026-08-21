@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="236" viewBox="0 0 1200 236" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="324" viewBox="0 0 1200 324" role="img" aria-labelledby="title desc">
   <title id="title">Piyal Dey — AI Engineer</title>
-  <desc id="desc">Piyal Dey, AI Engineer at Plant Supervision in Aalborg, Denmark. Designs and ships AI applications end to end: agents, retrieval, APIs, front ends and the infrastructure they run on. Python, TypeScript, Azure, Hetzner, Kubernetes.</desc>
+  <desc id="desc">Piyal Dey, AI Engineer at Plant Supervision in Aalborg, Denmark. Designing and shipping AI applications end to end: agents, retrieval, APIs, front ends and the infrastructure they run on. MSc Business Data Science (Aalborg University) and MSc Data Analytics and Design Thinking for Business (East Delta University). Microsoft Certified Azure Data Scientist Associate. Python, TypeScript, Claude Code, Azure, Hetzner, Docker, Kubernetes.</desc>
   <defs>
     <linearGradient id="rule" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0" stop-color="#58A6FF"/>
@@ -8,20 +8,31 @@
     </linearGradient>
   </defs>
 
+  <!-- Left column: x 0–600 -->
   <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
     <text x="0" y="30" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17" letter-spacing="2" fill="#8B949E">AI ENGINEER · AALBORG, DENMARK</text>
-    <text x="-4" y="112" font-size="84" font-weight="700" letter-spacing="-2" fill="#E6EDF3">Piyal Dey</text>
-    <rect x="0" y="130" width="560" height="3" rx="1.5" fill="url(#rule)"/>
-    <text x="0" y="172" font-size="24" fill="#C9D1D9">Designing and shipping AI applications end to end:</text>
-    <text x="0" y="204" font-size="24" fill="#C9D1D9">agents, retrieval, APIs, front ends and the infrastructure they run on.</text>
+    <text x="-3" y="102" font-size="66" font-weight="700" letter-spacing="-1.5" fill="#E6EDF3">Piyal Dey</text>
+    <rect x="0" y="118" width="520" height="3" rx="1.5" fill="url(#rule)"/>
+    <text x="0" y="158" font-size="23" fill="#C9D1D9">Designing and shipping AI applications end to end:</text>
+    <text x="0" y="190" font-size="23" fill="#C9D1D9">agents, retrieval, APIs, front ends</text>
+    <text x="0" y="222" font-size="23" fill="#C9D1D9">and the infrastructure they run on.</text>
   </g>
 
-  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19" text-anchor="end">
-    <text x="1200" y="58" font-size="16" letter-spacing="1.5" fill="#8B949E">ROLE</text>
-    <text x="1200" y="82" fill="#E6EDF3">AI Engineer, Plant Supervision</text>
-    <text x="1200" y="122" font-size="16" letter-spacing="1.5" fill="#8B949E">EDUCATION</text>
-    <text x="1200" y="146" fill="#E6EDF3">MSc Business Data Science, Aalborg University</text>
-    <text x="1200" y="186" font-size="16" letter-spacing="1.5" fill="#8B949E">STACK</text>
-    <text x="1200" y="210" fill="#E6EDF3">Python · TypeScript · Azure · Hetzner · Kubernetes</text>
+  <!-- Right column: right-aligned, never wider than 540 (starts at x ≥ 660) -->
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" text-anchor="end">
+    <text x="1200" y="50" font-size="15" letter-spacing="1.5" fill="#8B949E">ROLE</text>
+    <text x="1200" y="72" fill="#E6EDF3">AI Engineer, Plant Supervision</text>
+
+    <text x="1200" y="104" font-size="15" letter-spacing="1.5" fill="#8B949E">EDUCATION</text>
+    <text x="1200" y="126" fill="#E6EDF3">MSc Business Data Science, Aalborg University</text>
+    <text x="1200" y="148" fill="#E6EDF3">MSc Data Analytics &amp; Design Thinking for Business,</text>
+    <text x="1200" y="170" fill="#E6EDF3">East Delta University</text>
+
+    <text x="1200" y="202" font-size="15" letter-spacing="1.5" fill="#8B949E">CERTIFICATION</text>
+    <text x="1200" y="224" fill="#E6EDF3">Microsoft Certified: Azure Data Scientist (DP-100)</text>
+
+    <text x="1200" y="256" font-size="15" letter-spacing="1.5" fill="#8B949E">STACK</text>
+    <text x="1200" y="278" fill="#E6EDF3">Python · TypeScript · Claude Code</text>
+    <text x="1200" y="300" fill="#E6EDF3">Azure · Hetzner · Docker · Kubernetes</text>
   </g>
 </svg>
