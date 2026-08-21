@@ -151,7 +151,7 @@ def render_card(title: str, subtitle: str, rows: list[tuple[str, float]]) -> str
         out.append(f'  <circle cx="36" cy="{row_y - 6}" r="6" fill="{color}"/>')
         out.append(f'  <text x="54" y="{row_y}" font-family="{sans}" font-size="17" fill="#C9D1D9">{_esc(name)}</text>')
         out.append(f'  <text x="{CARD_W - 28}" y="{row_y}" text-anchor="end" font-family="{mono}" '
-                   f'font-size="17" fill="#8B949E">{format_pct(pct)}</text>')
+                   f'font-size="17" fill="#8B949E">{_esc(format_pct(pct))}</text>')
         row_y += 34
 
     out.append("</svg>")

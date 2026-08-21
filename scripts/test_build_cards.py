@@ -72,5 +72,14 @@ class RenderCardTest(unittest.TestCase):
         self.assertIn("&lt;x&gt;", svg)
 
 
+class WellFormedXmlTest(unittest.TestCase):
+    def test_tiny_percent_is_escaped_and_svg_parses(self):
+        import xml.dom.minidom
+        svg = bc.render_card("Top languages by commit", "commits over the last 12 months",
+                             [("Python", 99.95), ("Other", 0.05)])
+        self.assertIn("&lt;0.1%", svg)
+        xml.dom.minidom.parseString(svg)  # raises on malformed XML
+
+
 if __name__ == "__main__":
     unittest.main()
