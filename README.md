@@ -128,7 +128,7 @@ Compares feature-selection approaches (PCA, filter, wrapper, embedded) across ra
   </picture>
 </p>
 
-<p align="center"><sub>Rebuilt daily by a GitHub Action from public and private repositories. Notebook and generated HTML/CSS output are excluded; TypeScript and JavaScript are grouped.</sub></p>
+<p align="center"><sub>Rebuilt daily by a GitHub Action from my repositories. Notebook and generated HTML/CSS output are excluded; TypeScript and JavaScript are grouped.</sub></p>
 
 ## Contact
 

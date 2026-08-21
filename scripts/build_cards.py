@@ -16,7 +16,8 @@ Environment:
                    as a fallback but Windows sets it to the OS login)
     GITHUB_TOKEN   Token for API calls; the Actions default token is enough
                    for public repositories
-    PROFILE_TOKEN  Optional personal token with `repo` scope; when set, private
+    PROFILE_TOKEN  Optional fine-grained personal token (Metadata + Contents
+                   read-only on your repositories); when set, private
                    repositories and contributions are included too
 """
 from __future__ import annotations
@@ -40,6 +41,7 @@ API = "https://api.github.com"
 API_HOST = urllib.parse.urlsplit(API).hostname
 OUT_DIR = Path(__file__).resolve().parent.parent / "assets" / "readme"
 USERNAME_RE = re.compile(r"^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$")
+FULL_NAME_RE = re.compile(r"^[A-Za-z0-9_.-]{1,39}/[A-Za-z0-9_.-]{1,100}$")
 MAX_PAGES = 50
 
 HIDDEN = frozenset({"Jupyter Notebook", "HTML", "CSS", "Mako", "SCSS"})
@@ -321,7 +323,8 @@ class _SameHostRedirect(urllib.request.HTTPRedirectHandler):
 
     def redirect_request(self, req, fp, code, msg, headers, newurl):  # type: ignore[override]
         new_req = super().redirect_request(req, fp, code, msg, headers, newurl)
-        if new_req is not None and urllib.parse.urlsplit(newurl).hostname != API_HOST:
+        target = urllib.parse.urlsplit(newurl)
+        if new_req is not None and (target.scheme != "https" or target.hostname != API_HOST):
             new_req.remove_header("Authorization")
         return new_req
 
@@ -372,10 +375,21 @@ def list_repos(user: str, token: str, include_private: bool) -> list[dict[str, A
 
 
 def repo_languages(full_name: str, token: str) -> dict[str, int]:
-    """Language byte counts for one repository."""
-    data = _request(f"{API}/repos/{full_name}/languages", token)
+    """Language byte counts for one repository.
+
+    Error messages deliberately omit the repository name: workflow logs of a
+    public repository are world-readable and may otherwise leak private names.
+    """
+    if not FULL_NAME_RE.match(full_name):
+        raise ValueError("invalid repository full name returned by the API")
+    try:
+        data = _request(f"{API}/repos/{full_name}/languages", token)
+    except urllib.error.HTTPError as err:
+        if err.code == 401:
+            raise  # lets the caller fall back to public scope
+        raise RuntimeError(f"languages request failed with HTTP {err.code}") from None
     if not isinstance(data, dict):
-        raise RuntimeError(f"unexpected languages payload for {full_name}")
+        raise RuntimeError("unexpected languages payload")
     return {str(k): int(v) for k, v in data.items()}
 
 
@@ -390,7 +404,8 @@ def fetch_contributions(user: str, token: str) -> dict[str, Any]:
     data = _request(f"{API}/graphql", token, payload)
     if (not isinstance(data, dict) or data.get("errors")
             or not (data.get("data") or {}).get("user")):
-        raise RuntimeError(f"GraphQL error: {json.dumps(data)[:500]}")
+        errors = data.get("errors") if isinstance(data, dict) else None
+        raise RuntimeError(f"GraphQL error: {json.dumps(errors or 'no data')[:300]}")
     return data
 
 
@@ -443,12 +458,14 @@ def main() -> int:
         print("GITHUB_TOKEN or PROFILE_TOKEN is required", file=sys.stderr)
         return 2
 
-    print(f"scope: {'private + public (PROFILE_TOKEN)' if profile_token else 'public only'}")
+    print(f"scope: {'all repositories I can read' if profile_token else 'public repositories'}")
     try:
         cards = _build_with_fallback(user, token, profile_token,
                                      os.environ.get("GITHUB_TOKEN", "").strip())
     except urllib.error.HTTPError as err:
-        print(f"GitHub API error {err.code} for {err.url}: {err.read()[:300]!r}", file=sys.stderr)
+        # Log the endpoint family only; full URLs could name private repositories.
+        family = "/".join(urllib.parse.urlsplit(err.url).path.split("/")[:2]) or "/"
+        print(f"GitHub API error {err.code} on {family}", file=sys.stderr)
         return 1
     except (OSError, http.client.HTTPException, ValueError, RuntimeError, LookupError, TypeError) as err:
         print(f"build failed: {err!r}", file=sys.stderr)

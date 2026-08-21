@@ -218,6 +218,34 @@ class RedirectTest(unittest.TestCase):
         self.assertFalse(off_host.has_header("Authorization"))
         self.assertTrue(same_host.has_header("Authorization"))
 
+    def test_strips_token_on_https_downgrade(self):
+        handler = bc._SameHostRedirect()
+        req = urllib.request.Request(f"{bc.API}/x", headers={"Authorization": "Bearer t"})
+        downgraded = handler.redirect_request(req, None, 302, "Found", {}, f"http://{bc.API_HOST}/z")
+        self.assertFalse(downgraded.has_header("Authorization"))
+
+
+class RepoLanguagesTest(unittest.TestCase):
+    @staticmethod
+    def _http_error(code):
+        import io
+        import urllib.error
+        return urllib.error.HTTPError("https://api.github.com/repos/o/secret/languages", code, "x", {},
+                                      io.BytesIO(b""))
+
+    def test_redacts_repo_name_on_errors_but_passes_401_through(self):
+        with mock.patch.object(bc, "_request", side_effect=self._http_error(403)):
+            with self.assertRaises(RuntimeError) as ctx:
+                bc.repo_languages("o/secret", "tok")
+        self.assertNotIn("secret", str(ctx.exception))
+        with mock.patch.object(bc, "_request", side_effect=self._http_error(401)):
+            with self.assertRaises(bc.urllib.error.HTTPError):
+                bc.repo_languages("o/secret", "tok")
+
+    def test_rejects_malformed_full_name(self):
+        with self.assertRaises(ValueError):
+            bc.repo_languages("o/se cret?x", "tok")
+
 
 class MonthTicksEdgeTest(unittest.TestCase):
     def test_malformed_date_raises_value_error(self):
