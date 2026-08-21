@@ -1,24 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="480" height="290" viewBox="0 0 480 290" role="img" aria-labelledby="t d">
   <title id="t">Top languages by commit</title>
-  <desc id="d">my commits, last 12 months. Python 89.0%, TypeScript / JavaScript 9.5%, PowerShell 1.6%, Shell &lt;0.1%</desc>
+  <desc id="d">my commits, last 12 months. Python 89.4%, TypeScript / JavaScript 9.1%, PowerShell 1.5%, Shell &lt;0.1%</desc>
   <rect width="480" height="290" rx="16" fill="#0D1117"/>
   <rect x="0.5" y="0.5" width="479" height="289" rx="16" fill="none" stroke="#30363D"/>
   <text x="28" y="44" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="22" font-weight="700" fill="#E6EDF3">Top languages by commit</text>
   <text x="28" y="68" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#8B949E">my commits, last 12 months</text>
   <rect x="28" y="88" width="424" height="10" rx="5" fill="#21262D"/>
   <clipPath id="bar"><rect x="28" y="88" width="424" height="10" rx="5"/></clipPath>
-  <rect clip-path="url(#bar)" x="28.0" y="88" width="377.2" height="10" fill="#58A6FF"/>
-  <rect clip-path="url(#bar)" x="405.2" y="88" width="40.1" height="10" fill="#3FB950"/>
-  <rect clip-path="url(#bar)" x="445.3" y="88" width="6.7" height="10" fill="#D29922"/>
+  <rect clip-path="url(#bar)" x="28.0" y="88" width="379.1" height="10" fill="#58A6FF"/>
+  <rect clip-path="url(#bar)" x="407.1" y="88" width="38.5" height="10" fill="#3FB950"/>
+  <rect clip-path="url(#bar)" x="445.6" y="88" width="6.4" height="10" fill="#D29922"/>
   <circle cx="36" cy="122" r="6" fill="#58A6FF"/>
   <text x="54" y="128" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="17" fill="#E6EDF3">Python</text>
-  <text x="452" y="128" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17" fill="#8B949E">89.0%</text>
+  <text x="452" y="128" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17" fill="#8B949E">89.4%</text>
   <circle cx="36" cy="156" r="6" fill="#3FB950"/>
   <text x="54" y="162" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="17" fill="#E6EDF3">TypeScript / JavaScript</text>
-  <text x="452" y="162" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17" fill="#8B949E">9.5%</text>
+  <text x="452" y="162" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17" fill="#8B949E">9.1%</text>
   <circle cx="36" cy="190" r="6" fill="#D29922"/>
   <text x="54" y="196" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="17" fill="#E6EDF3">PowerShell</text>
-  <text x="452" y="196" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17" fill="#8B949E">1.6%</text>
+  <text x="452" y="196" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17" fill="#8B949E">1.5%</text>
   <circle cx="36" cy="224" r="6" fill="#A371F7"/>
   <text x="54" y="230" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="17" fill="#E6EDF3">Shell</text>
   <text x="452" y="230" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17" fill="#8B949E">&lt;0.1%</text>
