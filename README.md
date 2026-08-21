@@ -2,8 +2,8 @@
 
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/PD-BDS/PD-BDS/main/assets/readme/hero-dark.svg">
-    <img src="./assets/readme/hero-light.svg" width="100%" alt="Piyal Dey, AI Engineer in Aalborg, Denmark. Designing and shipping AI applications end to end: agents, retrieval, APIs, front ends and the infrastructure they run on. MSc Business Data Science (Aalborg University), MSc Data Analytics and Design Thinking for Business (East Delta University), Microsoft Certified Azure Data Scientist Associate. Python, TypeScript, Claude Code, Azure, Hetzner, Docker, Kubernetes.">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/PD-BDS/PD-BDS/main/assets/readme/hero-dark.svg?v=3">
+    <img src="./assets/readme/hero-light.svg?v=3" width="100%" alt="Piyal Dey, AI Engineer in Aalborg, Denmark. Designing and shipping AI applications end to end: agents, retrieval, APIs, front ends and the infrastructure they run on. MSc Business Data Science (Aalborg University), MSc Data Analytics and Design Thinking for Business (East Delta University), Microsoft Certified Azure Data Scientist Associate. Python, TypeScript, Claude Code, Azure, Hetzner, Docker, Kubernetes.">
   </picture>
 </p>
 
