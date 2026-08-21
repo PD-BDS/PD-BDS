@@ -411,6 +411,7 @@ def main() -> int:
         print("GITHUB_TOKEN or PROFILE_TOKEN is required", file=sys.stderr)
         return 2
 
+    print(f"scope: {'private + public (PROFILE_TOKEN)' if profile_token else 'public only'}")
     try:
         cards = _build(user, token, include_private=bool(profile_token))
     except urllib.error.HTTPError as err:
