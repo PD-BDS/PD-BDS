@@ -12,7 +12,8 @@ Notebook and generated-markup languages listed in HIDDEN are left out so the
 language cards reflect hand-written code.
 
 Environment:
-    USERNAME       GitHub login to build cards for (required)
+    PROFILE_USER   GitHub login to build cards for (required; USERNAME is accepted
+                   as a fallback but Windows sets it to the OS login)
     GITHUB_TOKEN   Token for API calls; the Actions default token is enough
                    for public repositories
     PROFILE_TOKEN  Optional personal token with `repo` scope; when set, private
@@ -21,6 +22,7 @@ Environment:
 from __future__ import annotations
 
 import datetime as dt
+import http.client
 import json
 import os
 import re
@@ -28,7 +30,7 @@ import sys
 import urllib.error
 import urllib.parse
 import urllib.request
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -106,7 +108,7 @@ class Calendar:
 # --------------------------------------------------------------------------- #
 # Pure data helpers (unit-tested)
 # --------------------------------------------------------------------------- #
-def aggregate_bytes(language_maps: list[Mapping[str, int]]) -> dict[str, int]:
+def aggregate_bytes(language_maps: Sequence[Mapping[str, int]]) -> dict[str, int]:
     """Sum language bytes across repositories."""
     totals: dict[str, int] = {}
     for langs in language_maps:
@@ -115,7 +117,7 @@ def aggregate_bytes(language_maps: list[Mapping[str, int]]) -> dict[str, int]:
     return totals
 
 
-def commit_weighted(repos: list[tuple[int, Mapping[str, int]]],
+def commit_weighted(repos: Sequence[tuple[int, Mapping[str, int]]],
                     hidden: frozenset[str] = HIDDEN) -> dict[str, float]:
     """Spread each repository's commit count across its visible languages."""
     totals: dict[str, float] = {}
@@ -184,12 +186,12 @@ def parse_calendar(data: Mapping[str, Any]) -> Calendar:
 def month_ticks(week_starts: tuple[str, ...]) -> list[tuple[int, str]]:
     """(week index, month label) for the first week of each month."""
     ticks: list[tuple[int, str]] = []
-    seen: set[str] = set()
+    seen: set[tuple[int, int]] = set()
     for i, iso in enumerate(week_starts):
-        year_month, day = iso[:7], int(iso[8:10])
-        if day <= 7 and year_month not in seen:
-            seen.add(year_month)
-            ticks.append((i, MONTHS[int(iso[5:7]) - 1]))
+        day = dt.date.fromisoformat(iso)  # ValueError on malformed input
+        if day.day <= 7 and (day.year, day.month) not in seen:
+            seen.add((day.year, day.month))
+            ticks.append((i, MONTHS[day.month - 1]))
     return ticks
 
 
@@ -256,9 +258,10 @@ def _area_chart(cal: Calendar, t: Theme) -> list[str]:
     if n < 2:
         return [f'  <text x="{left}" y="{base}" font-family="{MONO}" font-size="16" '
                 f'fill="{t.muted}">no calendar data</text>']
-    peak = max(max(cal.weeks), 1)
+    peak = max(cal.weeks)
+    scale = max(peak, 1)
     step = (right - left) / (n - 1)
-    pts = [(left + i * step, base - (v / peak) * (base - top)) for i, v in enumerate(cal.weeks)]
+    pts = [(left + i * step, base - (v / scale) * (base - top)) for i, v in enumerate(cal.weeks)]
     line = " L ".join(f"{x:.1f},{y:.1f}" for x, y in pts)
     out = [
         f'  <line x1="{left}" y1="{base}" x2="{right}" y2="{base}" stroke="{t.border}"/>',
@@ -373,7 +376,8 @@ def fetch_contributions(user: str, token: str) -> dict[str, Any]:
                  "to": now.strftime(stamp)}
     payload = json.dumps({"query": CONTRIB_QUERY, "variables": variables}).encode("utf-8")
     data = _request(f"{API}/graphql", token, payload)
-    if not isinstance(data, dict) or data.get("errors") or not data.get("data"):
+    if (not isinstance(data, dict) or data.get("errors")
+            or not (data.get("data") or {}).get("user")):
         raise RuntimeError(f"GraphQL error: {json.dumps(data)[:500]}")
     return data
 
@@ -401,9 +405,11 @@ def _build(user: str, token: str, include_private: bool) -> dict[str, str]:
 
 
 def main() -> int:
-    user = os.environ.get("USERNAME", "").strip()
+    # PROFILE_USER wins; USERNAME is kept for compatibility but note that Windows
+    # sets USERNAME to the OS login, so always pass PROFILE_USER for local runs.
+    user = (os.environ.get("PROFILE_USER") or os.environ.get("USERNAME", "")).strip()
     if not user:
-        print("USERNAME is required", file=sys.stderr)
+        print("PROFILE_USER (or USERNAME) is required", file=sys.stderr)
         return 2
     profile_token = os.environ.get("PROFILE_TOKEN", "").strip()
     token = profile_token or os.environ.get("GITHUB_TOKEN", "").strip()
@@ -417,7 +423,7 @@ def main() -> int:
     except urllib.error.HTTPError as err:
         print(f"GitHub API error {err.code} for {err.url}: {err.read()[:300]!r}", file=sys.stderr)
         return 1
-    except (urllib.error.URLError, TimeoutError, ValueError, RuntimeError, KeyError, TypeError) as err:
+    except (OSError, http.client.HTTPException, ValueError, RuntimeError, LookupError, TypeError) as err:
         print(f"build failed: {err!r}", file=sys.stderr)
         return 1
 

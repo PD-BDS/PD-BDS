@@ -1,6 +1,7 @@
 """Unit tests for build_cards.py (run: python -m unittest discover -s scripts -q)."""
 import os
 import unittest
+import urllib.request
 import xml.dom.minidom
 from unittest import mock
 
@@ -193,6 +194,33 @@ class FetchContributionsTest(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 bc.fetch_contributions("pd", "tok")
 
+    def test_raises_on_null_user(self):
+        with mock.patch.object(bc, "_request", return_value={"data": {"user": None}}):
+            with self.assertRaises(RuntimeError):
+                bc.fetch_contributions("pd", "tok")
+
+
+class RedirectTest(unittest.TestCase):
+    def test_strips_token_only_on_cross_host_redirect(self):
+        handler = bc._SameHostRedirect()
+        req = urllib.request.Request(f"{bc.API}/x", headers={"Authorization": "Bearer t"})
+        off_host = handler.redirect_request(req, None, 302, "Found", {}, "https://objects.example/y")
+        same_host = handler.redirect_request(req, None, 302, "Found", {}, f"{bc.API}/z")
+        self.assertFalse(off_host.has_header("Authorization"))
+        self.assertTrue(same_host.has_header("Authorization"))
+
+
+class MonthTicksEdgeTest(unittest.TestCase):
+    def test_malformed_date_raises_value_error(self):
+        with self.assertRaises(ValueError):
+            bc.month_ticks(("2026-13-03",))
+
+    def test_all_zero_weeks_show_peak_zero(self):
+        cal = bc.Calendar(0, (0, 0, 0), ("2026-01-04", "2026-01-11", "2026-01-18"))
+        svg = bc.render_activity(cal, 1, 0, DARK)
+        xml.dom.minidom.parseString(svg)
+        self.assertIn("peak 0 / week", svg)
+
 
 class BuildTest(unittest.TestCase):
     def test_produces_six_themed_cards(self):
@@ -222,7 +250,7 @@ class BuildTest(unittest.TestCase):
 
 class MainGuardTest(unittest.TestCase):
     def test_returns_1_and_writes_nothing_when_build_fails(self):
-        env = {"USERNAME": "pd", "GITHUB_TOKEN": "tok"}
+        env = {"PROFILE_USER": "pd", "GITHUB_TOKEN": "tok"}
         with mock.patch.dict(os.environ, env, clear=False), \
                 mock.patch.object(bc, "_build", side_effect=RuntimeError("no data")), \
                 mock.patch.object(bc.Path, "write_text") as write:
@@ -230,7 +258,8 @@ class MainGuardTest(unittest.TestCase):
         write.assert_not_called()
 
     def test_requires_username_and_token(self):
-        with mock.patch.dict(os.environ, {"USERNAME": "", "GITHUB_TOKEN": "", "PROFILE_TOKEN": ""}):
+        env = {"PROFILE_USER": "", "USERNAME": "", "GITHUB_TOKEN": "", "PROFILE_TOKEN": ""}
+        with mock.patch.dict(os.environ, env):
             self.assertEqual(bc.main(), 2)
 
 
