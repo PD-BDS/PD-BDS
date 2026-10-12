@@ -38,23 +38,6 @@ Designing and running machine-learning solutions on Azure: data preparation, tra
 
 <br clear="left">
 
-## Work at Plant Supervision
-
-Products I have built as an AI Engineer since 2025.
-
-**HireX** · AI-assisted candidate screening<br>
-HireX is an AI application for candidate screening, developed at Plant Supervision ApS. It assists project managers in writing a proper job description from the client's needs and the requirements of the role. Candidate CVs are embedded and a RAG pipeline finds the top-matching candidates for each job. Project managers and recruiters can then analyse each matched candidate's profile, see the insights drawn from it and read why the candidate would be a good fit for the role. <br>
-`FastAPI` `PostgreSQL` `LangGraph` `CrewAI` `ChromaDB` `React` `Azure`
-
-**Assessk** · SaaS for ISO 12100 machinery risk assessment<br>
-Assessk is a SaaS application for ISO 12100 machinery risk assessment with AI assistance. It takes a safety engineer through the complete assessment: project setup, hazard identification, risk estimation, reduction measures and the final report, delivered as a PDF. It works from the EU directives, the ISO standards and the Essential Health and Safety Requirements (EHSR). On that basis it suggests hazards, cites the relevant documents and standards, proposes measures to reduce risk and helps compile the report.
-The application makes no autonomous decision. Its purpose is to give safety engineers a structured and focused workflow by taking on the tedious parts of the work. That means finding the matching standards, writing report content in the proper language with correct citations, and the reporting and other supporting tasks. Their time can then go on machine safety and their own critical thinking.<br>
-`FastAPI` `LangGraph` `RAG` `Next.js` `TypeScript` `Docker` `Hetzner`
-
-**Contractbook** · internal contract-lifecycle tool<br>
-Contractbook is an internal contract-lifecycle application developed at Plant Supervision ApS for the company's own contract management. Users create contract templates and forms, so that one template can be reused across multiple parties. Contracts are drafted in a rich-text editor and signed electronically, and the application tracks the signing progress of each contract and files the finished documents. Every revision and every signature is recorded in a verifiable audit trail. It helps Legal team to create, filing and manage contracts.<br>
-`FastAPI` `React` `TypeScript` `Vite` `Tailwind`
-
 ## Tools I use
 
 <p align="center">
