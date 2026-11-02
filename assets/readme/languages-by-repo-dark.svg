@@ -7,8 +7,8 @@
   <text x="28" y="68" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#8B949E">code size across 25 repos I own</text>
   <rect x="28" y="88" width="424" height="10" rx="5" fill="#21262D"/>
   <clipPath id="bar"><rect x="28" y="88" width="424" height="10" rx="5"/></clipPath>
-  <rect clip-path="url(#bar)" x="28.0" y="88" width="212.7" height="10" fill="#58A6FF"/>
-  <rect clip-path="url(#bar)" x="240.7" y="88" width="205.0" height="10" fill="#3FB950"/>
+  <rect clip-path="url(#bar)" x="28.0" y="88" width="212.8" height="10" fill="#58A6FF"/>
+  <rect clip-path="url(#bar)" x="240.8" y="88" width="204.9" height="10" fill="#3FB950"/>
   <rect clip-path="url(#bar)" x="445.7" y="88" width="4.7" height="10" fill="#D29922"/>
   <rect clip-path="url(#bar)" x="450.4" y="88" width="2.0" height="10" fill="#A371F7"/>
   <rect clip-path="url(#bar)" x="452.4" y="88" width="2.0" height="10" fill="#6E7681"/>
